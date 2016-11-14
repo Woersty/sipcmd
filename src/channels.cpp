@@ -356,7 +356,10 @@ bool TestChannel::Read(void *buf, PINDEX len) {
 
 // Write writes FROM phone line
 bool TestChannel::Write(const void *buf, PINDEX len) {
-    std::cout << "TestChannel::Write" << std::endl;
+	
+  // less spam...
+  //  std::cout << "TestChannel::Write" << std::endl;
+  
     audiohandle.RecordFromBuffer(
             reinterpret_cast< const char *>(buf), len, false);
             //audiocodec.DetectSilence());
@@ -430,7 +433,8 @@ bool RawMediaStream::WriteData(const BYTE *data,
         PINDEX length, PINDEX &written)
 {
 //    cout << __func__ << endl;
-    if (!isOpen) {
+  written = 0;
+  if (!isOpen) {
         cout << "channel not open!" << endl;
         return false;
     }
@@ -449,7 +453,8 @@ bool RawMediaStream::WriteData(const BYTE *data,
         if (!m_channel->Write(data, length)) {
             cout << "data write failed!" << endl;
             return false;
-            CollectAverage(data, written);
+     written = m_channel->GetLastWriteCount();
+        CollectAverage(data, written);
         }
     } else {
         PBYTEArray silence(defaultDataSize);
@@ -457,9 +462,9 @@ bool RawMediaStream::WriteData(const BYTE *data,
             cout << "silence write failed!" << endl;
             return false;
         }
-        CollectAverage(silence, written);
+written = m_channel->GetLastWriteCount();
+    //    CollectAverage(silence, written);
     }
-    written = m_channel->GetLastWriteCount();
     // cout << "wrote " << written << endl;
     return true;
     //return OpalRawMediaStream::WriteData(data, length, written);

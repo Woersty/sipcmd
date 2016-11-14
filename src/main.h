@@ -157,6 +157,11 @@ class Manager : public OpalManager
         virtual OpalConnection::AnswerCallResponse OnAnswerCall(
                 OpalConnection &connection,
                 const PString &caller);
+				
+        virtual void OnUserInputTone(
+                OpalConnection &connection,
+                char tone,
+                int duration);
 
         bool WriteFrame(RTP_DataFrame &f);
         bool ReadFrame(RTP_DataFrame &f);

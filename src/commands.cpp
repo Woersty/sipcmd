@@ -130,6 +130,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
   PString gw = TPState::Instance().GetGateway();
   char buf[256];
   time_t secsnow = time(NULL);
+  time_t secsnow_pre = time(NULL);
   if(rp.Find('@') == P_MAX_INDEX  &&  !gw.IsEmpty()) {
     cout << "TestPhone::Main: calling \""
       << rp << "\" using gateway \"" << gw << "\""
@@ -160,14 +161,26 @@ bool Call::RunCommand(const std::string &loopsuffix) {
   if (tpstate.GetProtocol() != TPState::RTP)
     tpstate.SetState(state);
 
+  secsnow_pre = difftime(time(NULL), secsnow);
   do {
-    cout << "TestPhone::Main: calling \"" << rp << "\""
-	 << " for " << difftime(time(NULL), secsnow) << endl;
+    
+    
+    if( difftime(time(NULL), secsnow) > secsnow_pre  ) 
+    {
+    secsnow_pre = difftime(time(NULL), secsnow);
+    cout << "TestPhone::Main: calling \"" << rp << "\"" 
+    << " for " << difftime(time(NULL), secsnow) << " seconds " << endl;
+    } 
+   
     state = tpstate.WaitForStateChange(TPState::ESTABLISHED);
-    if(state == TPState::TERMINATED) {
+    
+    
+    if(state == TPState::TERMINATED) 
+    {
       errorstring = "Call: application terminated";
       return false;
-    } else if (difftime(time(NULL), secsnow) > DIAL_TIMEOUT) {
+    } else if (difftime(time(NULL), secsnow) > DIAL_TIMEOUT) 
+    {
       errorstring = "Call: Dial timed out";
       return false;
     }

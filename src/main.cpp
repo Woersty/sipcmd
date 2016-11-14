@@ -176,8 +176,9 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting sipcmd" << std::endl;
+    std::cout << "Starting sipcmd LoxBerry " << std::endl;
     debug << "in debug mode" << std::endl;
+    std::cout << "LoxBerry Plugin Edition by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
     PArgList &args = GetArguments();
 
     initSignalHandling();
@@ -185,7 +186,7 @@ void TestProcess::Main()
     if (manager->Init(args))
         manager->Main(args);
 
-    std::cout << "Exiting..." << std::endl;
+    std::cout << "Exiting sipcmd LoxBerry Edition v0.1..." << std::endl;
     delete manager;
 
 }
@@ -264,8 +265,8 @@ void Manager::Main(PArgList &args)
     SetSilenceDetectParams(sd);
 
     if (pauseBeforeDialing) {
-        cout << "sleep 2000 ms to allow time for registration ... " << std::endl; 
-        PThread::Sleep(2000);
+        cout << "sleep 1000 ms to allow time for registration ... " << std::endl; 
+        PThread::Sleep(1000);
         cout << "Done!" << std::endl;
     }
 
@@ -311,6 +312,7 @@ bool Manager::Init(PArgList &args)
     // Parse various command line arguments
     args.Parse(
             "u-user:"
+            "a-alias:"
             "c-password:"
             "l-localaddress:"
             "o-opallog:"
@@ -363,6 +365,10 @@ bool Manager::Init(PArgList &args)
         if (args.HasOption('u')) {
             sipep->SetDefaultLocalPartyName(args.GetOptionString('u'));
         }
+
+       if (args.HasOption('a')) {
+            sipep->SetDefaultDisplayName(args.GetOptionString('a'));
+       }
 
         if (args.HasOption('c')) {
             SIPRegister::Params param;
@@ -720,3 +726,9 @@ void Manager::OnClearedCall(OpalCall &call)
     std::cout << __func__ << std::endl;
 }
 
+void Manager::OnUserInputTone(OpalConnection &connection,char tone ,int duration)
+{
+    std::cout << __func__ << std::endl;
+    std::cout << "Tone " << tone << " duration " << duration << std::endl;
+    OpalManager::OnUserInputTone(connection , tone, duration);
+}
