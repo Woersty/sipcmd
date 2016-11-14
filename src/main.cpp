@@ -446,7 +446,7 @@ bool Manager::SendDTMF(const PString &dtmf)
     PSafePtr<OpalConnection> connection = call->GetConnection(
             listenmode ? 0 : 1);
     if (connection) {
-        size_t i = 0;
+        int i = 0;
         for (; i < dtmf.GetSize() - 1; i++) {
             if (!connection->SendUserInputTone(dtmf[i], 0))
                 break;
