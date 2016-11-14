@@ -119,7 +119,7 @@ bool Call::ParseCommand(
 }
 
 bool Call::RunCommand(const std::string &loopsuffix) {
-  std::cout << "## Call ##" << std::endl;
+  std::cerr << "## Call ##" << std::endl;
   // set up
   PString token;
   TPState &tpstate = TPState::Instance();
@@ -132,7 +132,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
   time_t secsnow = time(NULL);
   time_t secsnow_pre = time(NULL);
   if(rp.Find('@') == P_MAX_INDEX  &&  !gw.IsEmpty()) {
-    cout << "TestPhone::Main: calling \""
+    std::cerr << "TestPhone::Main: calling \""
       << rp << "\" using gateway \"" << gw << "\""
       << " at " << ctime_r(&secsnow, buf) << endl;
 
@@ -147,7 +147,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
     //rp += gw;
   }
   else {
-    cout << "TestPhone::Main: calling \"" << rp << "\""
+    std::cerr << "TestPhone::Main: calling \"" << rp << "\""
       << " at " << ctime_r(&secsnow, buf) << endl;
   }
 
@@ -168,7 +168,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
     if( difftime(time(NULL), secsnow) > secsnow_pre  ) 
     {
     secsnow_pre = difftime(time(NULL), secsnow);
-    cout << "TestPhone::Main: calling \"" << rp << "\"" 
+    std::cerr << "TestPhone::Main: calling \"" << rp << "\"" 
     << " for " << difftime(time(NULL), secsnow) << " seconds " << endl;
     } 
    
@@ -189,7 +189,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
   tpstate.SetSilenceState(false);
   
   /* TODO
-  cout << "Call: connection established, "
+  std::cerr << "Call: connection established, "
     << "RemotePartyName='" << connection->GetRemotePartyName() << "'"
     << endl;
     */
@@ -218,10 +218,10 @@ bool Answer::ParseCommand(
 }
 
 bool Answer::RunCommand(const std::string &loopsuffix) {
-  std::cout << "## Answer ##" << std::endl;
+  std::cerr << "## Answer ##" << std::endl;
   char buf[256];
   time_t secsnow = time(NULL);
-  cout << "Answer: starting at " << ctime_r(&secsnow, buf) << endl;
+  std::cerr << "Answer: starting at " << ctime_r(&secsnow, buf) << endl;
 
   // set up
   PString token;
@@ -245,7 +245,7 @@ bool Answer::RunCommand(const std::string &loopsuffix) {
   } while(state == TPState::CONNECTING);
 
   // TODO tpstate.SetSilenceState(false);
-  cout << "Answer: connection established" << endl;
+  std::cerr << "Answer: connection established" << endl;
   return true;
 }
 
@@ -265,10 +265,10 @@ bool Hangup::ParseCommand(
 
 bool Hangup::RunCommand(const std::string &loopsuffix) {
 
-  std::cout << "## Hangup ##" << std::endl;
+  std::cerr << "## Hangup ##" << std::endl;
   char buf[256];
   time_t secsnow = time(NULL);
-  cout << "Hangup: at " << ctime_r(&secsnow, buf) << endl;
+  std::cerr << "Hangup: at " << ctime_r(&secsnow, buf) << endl;
   TPState &tpstate = TPState::Instance();
 
   // hangup
@@ -301,7 +301,7 @@ bool DTMF::ParseCommand(
 
 bool DTMF::RunCommand(const std::string &loopsuffix) {
 
-    cout << "## DTMF \"" << digits << "\" ##" << endl;
+    std::cerr << "## DTMF \"" << digits << "\" ##" << endl;
     return
       TPState::Instance().GetManager()->SendDTMF(digits);
 }
@@ -326,7 +326,7 @@ bool Voice::ParseCommand(
 
 bool Voice::RunCommand(const std::string &loopsuffix) {
 
-  std::cout << "## Voice audiofile="<< audiofilename << " ##" << std::endl;
+  std::cerr << "## Voice audiofile="<< audiofilename << " ##" << std::endl;
 
   // playback audio
    bool ok = 
@@ -457,30 +457,30 @@ bool Wait::ParseCommand(
 
 bool Wait::RunCommand(const std::string &loopsuffix) {
 
-  cout << "## Wait: waiting for " << millis << "ms ##" << endl;
+  std::cerr << "## Wait: waiting for " << millis << "ms ##" << endl;
   for(int n = millis / WAIT_SLEEP_ACCURACY; n >= 0; n--) {
     // silence detection
     if(silence
         &&  TPState::Instance().IsSilent(
 	  WAIT_SILENCE_TIME_IN_MS * BYTES_PER_MILLIS)) {
-      cout << "Wait: silence detected" << endl;
+      std::cerr << "Wait: silence detected" << endl;
       break;
     }
     // activity detection
     else if(activity
         &&  TPState::Instance().IsActive(
           WAIT_ACTIVITY_TIME_IN_MS * BYTES_PER_MILLIS)) {
-      cout << "Wait: activity detected" << endl;
+      std::cerr << "Wait: activity detected" << endl;
       break;
     }
     // disconnect detection
     if(closed
         &&  (TPState::Instance().GetState() == TPState::TERMINATED
           ||  TPState::Instance().GetState() == TPState::CLOSED)) {
-      cout << "Wait: connection closed" << endl;
+      std::cerr << "Wait: connection closed" << endl;
       return true;
     }
-    //cout << "Wait: usleep " << n << endl;
+    //std::cerr << "Wait: usleep " << n << endl;
     usleep(WAIT_SLEEP_ACCURACY * 1000);
     if(!closed
         &&  TPState::Instance().GetState() == TPState::TERMINATED) {
@@ -488,7 +488,7 @@ bool Wait::RunCommand(const std::string &loopsuffix) {
       return false;
     }
   }
-  cout << "Wait: wait done" << endl;
+  std::cerr << "Wait: wait done" << endl;
   return true;
 }
 
@@ -580,7 +580,7 @@ bool Loop::RunCommand(const std::string &loopsuffix) {
     time_t secsnow = time(NULL);
     stringstream newsuffix;
     newsuffix << loopsuffix << "_" << timesleft;
-    cout << "Loop: iteration \"" << newsuffix.str()
+    std::cerr << "Loop: iteration \"" << newsuffix.str()
       << "\" at " << ctime_r(&secsnow, buf) << endl;
 
     if(!Command::Run(loopedsequence, newsuffix.str()))

@@ -176,9 +176,8 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting sipcmd LoxBerry " << std::endl;
-    debug << "in debug mode" << std::endl;
-    std::cout << "LoxBerry Plugin Edition by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
+    std::cout << "Starting sipcmd for LoxBerry v0.1" << std::endl;
+//  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
     initSignalHandling();
@@ -186,7 +185,7 @@ void TestProcess::Main()
     if (manager->Init(args))
         manager->Main(args);
 
-    std::cout << "Exiting sipcmd LoxBerry Edition v0.1..." << std::endl;
+    std::cout << "Exiting." << std::endl;
     delete manager;
 
 }
@@ -194,14 +193,14 @@ void TestProcess::Main()
 LocalEndPoint::LocalEndPoint(Manager &m) :
     OpalLocalEndPoint(m), m_manager(m)
 {
-  std::cout << "Created LocalEndPoint" << std::endl;
+  std::cerr << "Created LocalEndPoint" << std::endl;
 }
 
 PSafePtr<OpalConnection> LocalEndPoint::MakeConnection(OpalCall &call, 
         const PString &remoteParty, void *userData, unsigned int options,
         OpalConnection::StringOptions *opts)
 {
-    std::cout << "LocalEndpoint::" << __func__ << std::endl;
+    std::cerr << "LocalEndpoint::" << __func__ << std::endl;
     return AddConnection(CreateConnection(call, userData, options, opts));
 // return OpalLocalEndPoint::MakeConnection(call, remoteParty, userData, options, opts);
 }
@@ -210,7 +209,7 @@ OpalLocalConnection * LocalEndPoint::CreateConnection(
         OpalCall & call, void *userData, unsigned opts, 
         OpalConnection::StringOptions *stropts)
 {
-    std::cout << "LocalEndpoint" << __func__ << std::endl;
+    std::cerr << "LocalEndpoint" << __func__ << std::endl;
     //return OpalLocalEndPoint::CreateConnection(call, userData);
     return new LocalConnection(call, *this, userData, opts, stropts);
 }
@@ -221,7 +220,7 @@ bool LocalEndPoint::OnReadMediaData(
     const OpalMediaStream &mediaStream,
     void *data, PINDEX size, PINDEX &length) 
 {
-  std::cout << __func__ << " datalen="<< size << std::endl;
+  std::cerr << __func__ << " datalen="<< size << std::endl;
   return true;
 
   //return const_cast<OpalMediaStream*>(&mediaStream)->ReadData(
@@ -234,7 +233,7 @@ bool LocalEndPoint::OnWriteMediaData(
     const OpalMediaStream &mediaStream,
     const void *data, PINDEX length, PINDEX &written)
 {
-  std::cout << __func__ << std::endl;
+  std::cerr << __func__ << std::endl;
   return true;
   //return const_cast<OpalMediaStream*>(&mediaStream)->WriteData(
   //        (BYTE*)data, length, written);
@@ -243,20 +242,20 @@ bool LocalEndPoint::OnWriteMediaData(
 Manager::Manager() : localep(NULL), sipep(NULL), h323ep(NULL), 
   listenmode(false), listenerup(false), pauseBeforeDialing(false)
 {
-  std::cout << __func__  << std::endl;
+  std::cerr << __func__  << std::endl;
 }
 
 
 Manager:: ~Manager()
 {
-  std::cout << __func__ << std::endl;
+  std::cerr << __func__ << std::endl;
   delete (m_rtpsession);
 }
 
 
 void Manager::Main(PArgList &args)
 {
-  std::cout << __func__ << std::endl;
+  std::cerr << __func__ << std::endl;
 
 
     // silence detection
@@ -265,9 +264,9 @@ void Manager::Main(PArgList &args)
     SetSilenceDetectParams(sd);
 
     if (pauseBeforeDialing) {
-        cout << "sleep 1000 ms to allow time for registration ... " << std::endl; 
+        std::cerr << "sleep 1000 ms to allow time for registration ... " << std::endl; 
         PThread::Sleep(1000);
-        cout << "Done!" << std::endl;
+        std::cerr << "Done!" << std::endl;
     }
 
     // init command sequence
@@ -300,15 +299,15 @@ void Manager::Main(PArgList &args)
         Command::DeleteSequence(sequence);
     }
 
-    cout << "TestPhone::Main: shutting down" << endl;
+    std::cerr << "TestPhone::Main: shutting down" << endl;
     TPState::Instance().SetState(TPState::TERMINATED);
     ClearAllCalls();
-    cout << "TestPhone::Main: exiting..." << endl;
+    std::cerr << "TestPhone::Main: exiting..." << endl;
 }
 
 bool Manager::Init(PArgList &args)
 {
-    std::cout << __func__ << std::endl;
+    std::cerr << __func__ << std::endl;
     // Parse various command line arguments
     args.Parse(
             "u-user:"
@@ -352,7 +351,7 @@ bool Manager::Init(PArgList &args)
 
     string protocol = stringify(args.GetOptionString('P')); 
     if (!protocol.compare("sip")) {
-        cout << "initialising SIP endpoint..." << endl;
+        std::cerr << "initialising SIP endpoint..." << endl;
         sipep = new SIPEndPoint(*this);
 
         sipep->SetRetryTimeouts(10000, 30000);
@@ -385,13 +384,13 @@ bool Manager::Init(PArgList &args)
 	    }
 
             if (!sipep->Register(param, *aor)) { 
-                cout 
+                std::cerr 
                     << "Could not register to " 
                     << param.m_registrarAddress << endl;
                 return false;
             }
             else {
-                cout 
+                std::cerr 
                     << "registered as " 
                     << aor->GetPointer(aor->GetSize()) << endl;
             }
@@ -400,7 +399,7 @@ bool Manager::Init(PArgList &args)
         TPState::Instance().SetProtocol(TPState::SIP);
 
     } else if (!protocol.compare("h323")) {
-        cout << "initialising H.323 endpoint..." << endl;
+        std::cerr << "initialising H.323 endpoint..." << endl;
         h323ep = new H323EndPoint(*this);
         AddRouteEntry("pc:.*             = h323:<da>");
         AddRouteEntry("h323:.* = pc:<da>");
@@ -411,7 +410,7 @@ bool Manager::Init(PArgList &args)
         TPState::Instance().SetProtocol(TPState::H323);
 
     } else if (!protocol.compare("rtp")) {
-        cout << "initialising RTP endpoint..." << endl;
+        std::cerr << "initialising RTP endpoint..." << endl;
         TPState::Instance().SetProtocol(TPState::RTP);
 
     } else {
@@ -471,7 +470,7 @@ bool Manager::SendDTMF(const PString &dtmf)
             
 RTPSession::RTPSession(const Params& options) : RTP_UDP(options), m_audioformat(NULL)
 {
-  std::cout << "RTP session created" << std::endl;
+  std::cerr << "RTP session created" << std::endl;
 }
 
 void RTPSession::SelectAudioFormat(const Payload payload) 
@@ -483,17 +482,17 @@ void RTPSession::SelectAudioFormat(const Payload payload)
     case PCM16:
       m_audioformat = new OpalAudioFormat(
           "OPAL_PCM16", RTP_DataFrame::MaxPayloadType, "", 16, 8, 240, 0, 256, 8000, 0);
-      cout << "Payload format: OPAL_PCM16" << endl;
+      std::cerr << "Payload format: OPAL_PCM16" << endl;
       break;
     case G711_ULAW:
       m_audioformat = new OpalAudioFormat(
           "OPAL_G711_ULAW_64K", RTP_DataFrame::PCMU, "PCMU", 16, 8, 240, 0, 256, 8000, 0);
-      cout << "Payload format: OPAL_G711_ULAW_64K" << endl;
+      std::cerr << "Payload format: OPAL_G711_ULAW_64K" << endl;
       break;
     case G711_ALAW:
       m_audioformat = new OpalAudioFormat(
           "OPAL_G711_ALAW_64K", RTP_DataFrame::PCMA, "PCMA", 16, 8, 240, 0, 256, 8000, 0);
-      cout << "Payload format: OPAL_G711_ULAW_64K" << endl;
+      std::cerr << "Payload format: OPAL_G711_ULAW_64K" << endl;
       break;
   }
 }
@@ -504,7 +503,7 @@ RTP_Session::SendReceiveStatus RTPSession::OnReceiveData(RTP_DataFrame &frame)
 #if 1 // master dump
   std::ostringstream os;
   frame.PrintOn(os);
-  std::cout << os.str() << std::endl;
+  std::cerr << os.str() << std::endl;
 #endif
 
   TPState::Instance().GetRecordAudio().RecordFromBuffer(
@@ -519,7 +518,7 @@ RTP_Session::SendReceiveStatus RTPSession::OnSendData(RTP_DataFrame &frame)
 #if 1 // master dump
   std::ostringstream os;
   frame.PrintOn(os);
-  std::cout << os.str() << std::endl;
+  std::cerr << os.str() << std::endl;
 #endif
 
   return ret;
@@ -527,7 +526,7 @@ RTP_Session::SendReceiveStatus RTPSession::OnSendData(RTP_DataFrame &frame)
 
 
 RTP_Session::SendReceiveStatus RTPSession::OnReadTimeout(RTP_DataFrame &frame) {
-  std::cout << __func__ << std::endl;
+  std::cerr << __func__ << std::endl;
   TPState::Instance().GetRecordAudio().StopRecording(false);
   return RTP_UDP::OnReadTimeout(frame);
 }
@@ -535,7 +534,7 @@ RTP_Session::SendReceiveStatus RTPSession::OnReadTimeout(RTP_DataFrame &frame) {
 
 bool Manager::MakeCall(const PString &remoteParty)
 {
-    cout << "Setting up a call to: " << remoteParty << endl;
+    std::cerr << "Setting up a call to: " << remoteParty << endl;
     PString token;
     if (TPState::Instance().GetProtocol() != TPState::RTP) {
       if (!SetUpCall("local:*", remoteParty, token)) {
@@ -577,18 +576,18 @@ bool Manager::MakeCall(const PString &remoteParty)
       }
 
       m_rtpsession->SetJitterBufferSize(100, 1000);
-      std::cout  
+      std::cerr  
          << "RTP local address:     " << local << std::endl
          << "RTP local data port:   " << m_rtpsession->GetLocalDataPort() << std::endl
          << "RTP remote address:    " << remote << std::endl
          << "RTP remote data port:  " << m_rtpsession->GetRemoteDataPort() << std::endl;
      
-      std::cout << "RTP stream set up!" << std::endl;
+      std::cerr << "RTP stream set up!" << std::endl;
       TPState::Instance().SetState(TPState::ESTABLISHED);
       return true;
     }
 
-    cout << "connection set up to " << remoteParty << endl;
+    std::cerr << "connection set up to " << remoteParty << endl;
     std::string val = token;
     currentCallToken = val;
     return true;
@@ -619,7 +618,7 @@ bool Manager::StartListener()
 {
     // TODO h323.
     PIPSocket::Address sipaddr = INADDR_ANY;
-    cout << "Listening for SIP signalling on " << sipaddr << ":" 
+    std::cerr << "Listening for SIP signalling on " << sipaddr << ":" 
          << TPState::Instance().GetListenPort() << endl;
   
     OpalListenerUDP *siplistener = new OpalListenerUDP(
@@ -635,7 +634,7 @@ bool Manager::StartListener()
         return false;
     }
 
-    std::cout << "SIP listener up" << std::endl;
+    std::cerr << "SIP listener up" << std::endl;
     listenerup= true;
     return true;
 }
@@ -643,14 +642,14 @@ bool Manager::StartListener()
 bool Manager::OnOpenMediaStream(OpalConnection &connection, 
         OpalMediaStream &stream)
 {
-    std::cout <<  __func__ << std::endl;
+    std::cerr <<  __func__ << std::endl;
     if (!OpalManager::OnOpenMediaStream(connection, stream)) {
         std::cerr << "OnOpenMediaStream failed!" << std::endl;
         return false;
     }
 
     PCaselessString prefix = connection.GetEndPoint().GetPrefixName();
-    std::cout << (stream.IsSink() ? 
+    std::cerr << (stream.IsSink() ? 
         "streaming media to " : "recording media from ") 
         << prefix << std::endl;
 
@@ -659,7 +658,7 @@ bool Manager::OnOpenMediaStream(OpalConnection &connection,
 
 void RTPUserData::OnTxStatistics(const RTP_Session &session)
 {
-  cout << __func__ << endl;
+  std::cerr << __func__ << endl;
 }
 
 
@@ -667,7 +666,7 @@ OpalConnection::AnswerCallResponse Manager::OnAnswerCall(
         OpalConnection &connection,
         const PString &caller)
 {
-    std::cout << "Incoming call from " << caller << std::endl;
+    std::cerr << "Incoming call from " << caller << std::endl;
     std::string val = connection.GetCall().GetToken();
     currentCallToken = val; 
     return OpalConnection::AnswerCallNow;
@@ -675,13 +674,13 @@ OpalConnection::AnswerCallResponse Manager::OnAnswerCall(
 
 void Manager::OnClosedMediaStream (const OpalMediaStream &stream)
 {
-    std::cout << __func__ << std::endl;
+    std::cerr << __func__ << std::endl;
 }
 
 bool Manager::OnIncomingConnection(OpalConnection &connection, unsigned opts,
         OpalConnection::StringOptions *stropts)
 {
-    std::cout << __func__ << ": token=" << connection.GetToken() << std::endl;
+    std::cerr << __func__ << ": token=" << connection.GetToken() << std::endl;
 
     TPState::Instance().SetState(TPState::ESTABLISHED);
     //localep->AcceptIncomingCall(connection.GetCall().GetToken());
@@ -690,7 +689,7 @@ bool Manager::OnIncomingConnection(OpalConnection &connection, unsigned opts,
 
 void Manager::OnEstablished(OpalConnection &connection)
 {
-    std::cout << __func__ << std::endl;
+    std::cerr << __func__ << std::endl;
     TPState::Instance().SetState(TPState::ESTABLISHED);
     OpalManager::OnEstablished(connection);
 }
@@ -698,13 +697,13 @@ void Manager::OnEstablished(OpalConnection &connection)
 
 void Manager::OnEstablishedCall(OpalCall &call)
 {
-    std::cout << __func__ << std::endl;
+    std::cerr << __func__ << std::endl;
 
     TPState::Instance().SetState(TPState::ESTABLISHED);
     currentCallToken = std::string(
             static_cast<const char*>(call.GetToken()));
 
-    std::cout << "In call with " << call.GetPartyB() << " using "
+    std::cerr << "In call with " << call.GetPartyB() << " using "
         << call.GetPartyA() << " token=[" << currentCallToken << "]" 
         << std::endl;
     OpalManager::OnEstablishedCall(call);
@@ -713,7 +712,7 @@ void Manager::OnEstablishedCall(OpalCall &call)
 void Manager::OnReleased(OpalConnection &connection)
 {
     OpalConnection::CallEndReason r = connection.GetCallEndReason();
-    std::cout << __func__ <<": reason: " << 
+    std::cerr << __func__ <<": reason: " << 
         get_call_end_reason_string(r) << std::endl;
 
     TPState::Instance().SetState(TPState::CLOSED);
@@ -723,12 +722,12 @@ void Manager::OnReleased(OpalConnection &connection)
 
 void Manager::OnClearedCall(OpalCall &call)
 {
-    std::cout << __func__ << std::endl;
+    std::cerr << __func__ << std::endl;
 }
 
 void Manager::OnUserInputTone(OpalConnection &connection,char tone ,int duration)
 {
-    std::cout << __func__ << std::endl;
-    std::cout << "Tone " << tone << " duration " << duration << std::endl;
+    std::cerr << __func__ << std::endl;
+    std::cout << "receive DTMF: [" << tone << "] Duration: " << duration << std::endl;
     OpalManager::OnUserInputTone(connection , tone, duration);
 }

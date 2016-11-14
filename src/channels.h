@@ -43,11 +43,11 @@ class TestChanAudio
             stop_recording_when_silent(false), recordmillisec(0U),
             playfile(NULL), recfile(NULL), playsync(), recsync(), 
             sync(1U, 1U) {
-                std::cout << __func__ << std::endl;
+                std::cerr << __func__ << std::endl;
             }
         
         ~TestChanAudio() {
-            std::cout << __func__ << std::endl;
+            std::cerr << __func__ << std::endl;
             AutoSync a(sync);
             StopAudioPlayback();
             StopAudioRecording();
@@ -76,7 +76,7 @@ class TestChanAudio
 
         // other
         void CloseChannel() {
-            cout << "TestChanAudio::CloseChannel" << endl;
+            std::cerr << "TestChanAudio::CloseChannel" << endl;
             AutoSync a(sync);
             StopAudioPlayback();
             StopAudioRecording();
@@ -108,12 +108,12 @@ class TestChannel : public PIndirectChannel
         TestChannel(OpalConnection &conn, TestChanAudio &chan) : 
             connection(conn), audiohandle(chan), is_open(false),
             readDelay(), writeDelay() {
-                std::cout << __func__ << "[ " << 
+                std::cerr << __func__ << "[ " << 
 		  this->connection << " - " << this << " ]" << std::endl; 
             }
         
         ~TestChannel() {
-	  std::cout << __func__ << "[ " << this->connection 
+	  std::cerr << __func__ << "[ " << this->connection 
                << " - " << this << " ]" << std::endl; 
             Close();
         }

@@ -26,9 +26,9 @@
 #include <opal/localep.h>
 
 #ifdef DEBUG
-#define debug cout
+#define debug cerr
 #else
-#define debug 0 && cout
+#define debug 0 && cerr
 #endif
 #endif
 
