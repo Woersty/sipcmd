@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <ptlib.h>
+extern int DIAL_TIMEOUT;
 
 // See README.txt for <prog> syntax.
 

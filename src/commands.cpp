@@ -169,7 +169,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
     {
     secsnow_pre = difftime(time(NULL), secsnow);
     std::cerr << "TestPhone::Main: calling \"" << rp << "\"" 
-    << " for " << difftime(time(NULL), secsnow) << " seconds " << endl;
+    << " for " << difftime(time(NULL), secsnow) << "/" << DIAL_TIMEOUT << " seconds" << endl;
     } 
    
     state = tpstate.WaitForStateChange(TPState::ESTABLISHED);
@@ -181,7 +181,7 @@ bool Call::RunCommand(const std::string &loopsuffix) {
       return false;
     } else if (difftime(time(NULL), secsnow) > DIAL_TIMEOUT) 
     {
-      errorstring = "Call: Dial timed out";
+      errorstring = "Call: Dial timed out, check -T / --dialtimeout command line option";
       return false;
     }
   } while(state == TPState::CONNECTING);

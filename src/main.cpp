@@ -25,6 +25,8 @@
 #include "commands.h"
 #include "state.h"
 //#include "channels.h"
+int DIAL_TIMEOUT;
+
 TPState *TPState::instance = NULL;
 
 PCREATE_PROCESS(TestProcess);
@@ -37,19 +39,20 @@ static std::string stringify(const PString &broken) {
 
 static void print_help() {
     cerr << "sipcmd options: " << endl
-        << "-u <name>   --user <name>         username (required)" << endl
-        << "-c <passw>  --password <passw>    password for registration" << endl
-        << "-a <name>   --alias <name>        username alias" << endl 
-        << "-l <addr>   --localaddress <addr> local address to listen on" << endl 
-        << "-o <file>   --opallog <file>      enable extra opal library logging to file" << endl
-        << "-p <port>   --listenport <port>   the port to listen on" << endl 
-        << "-P <proto>  -- protocol <proto>   sip/h323/rtp (required)" << endl 
-        << "-r <nmbr>   --remoteparty <nmbr>  the party to call to" << endl 
-        << "-x <prog>   --execute <prog>      program to follow" << endl  
-        << "-d <prfx>   --audio-prefix <prfx> recorded audio filename prefix" << endl 
-        << "-f <file>   --file <file>         the name of played sound file" << endl 
-        << "-g <addr>   --gatekeeper <addr>   gatekeeper to use" << endl 
-        << "-w <addr>   --gateway <addr>      gateway to use" << endl << endl;
+        << "-T <timeout> --dialtimeout <timeout>  dial timeout in seconds" << endl
+        << "-u <name>    --user <name>            username (required)" << endl
+        << "-c <passw>   --password <passw>       password for registration" << endl
+        << "-a <name>    --alias <name>           username alias" << endl 
+        << "-l <addr>    --localaddress <addr>    local address to listen on" << endl 
+        << "-o <file>    --opallog <file>         enable extra opal library logging to file" << endl
+        << "-p <port>    --listenport <port>      the port to listen on" << endl 
+        << "-P <proto>   -- protocol <proto>      sip/h323/rtp (required)" << endl 
+        << "-r <nmbr>    --remoteparty <nmbr>     the party to call to" << endl 
+        << "-x <prog>    --execute <prog>         program to follow" << endl  
+        << "-d <prfx>    --audio-prefix <prfx>    recorded audio filename prefix" << endl 
+        << "-f <file>    --file <file>            the name of played sound file" << endl 
+        << "-g <addr>    --gatekeeper <addr>      gatekeeper to use" << endl 
+        << "-w <addr>    --gateway <addr>         gateway to use" << endl << endl;
 
     cerr << "The EBNF definition of the program syntax:" << endl
         << "<prog>  := cmd ';' <prog> | " << endl
@@ -176,7 +179,7 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting sipcmd for LoxBerry v0.1" << std::endl;
+    std::cout << "Starting LoxBerry Plugin Edition v0.2 by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
 //  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
@@ -273,6 +276,12 @@ void Manager::Main(PArgList &args)
     const char *cmdseq = "";
     std::vector<Command*> sequence;
     
+    if (args.HasOption('T')) {
+               
+        DIAL_TIMEOUT = args.GetOptionString('T').AsInteger();
+        cout << "DIAL_TIMEOUT is "<< DIAL_TIMEOUT << endl;
+    }
+
     if (args.HasOption('x')) {
         
         cmdseq = args.GetOptionString('x');
@@ -310,6 +319,7 @@ bool Manager::Init(PArgList &args)
     std::cerr << __func__ << std::endl;
     // Parse various command line arguments
     args.Parse(
+            "T-dialtimeout:"
             "u-user:"
             "a-alias:"
             "c-password:"
