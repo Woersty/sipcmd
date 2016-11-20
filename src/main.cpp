@@ -179,7 +179,7 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting LoxBerry Plugin Edition v0.2 by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
+    std::cout << "Starting LoxBerry Plugin Edition v0.3 by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
 //  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
@@ -279,7 +279,7 @@ void Manager::Main(PArgList &args)
     if (args.HasOption('T')) {
                
         DIAL_TIMEOUT = args.GetOptionString('T').AsInteger();
-        cout << "DIAL_TIMEOUT is "<< DIAL_TIMEOUT << endl;
+        cerr << "DIAL_TIMEOUT is "<< DIAL_TIMEOUT << endl;
     }
 
     if (args.HasOption('x')) {
