@@ -42,7 +42,6 @@ static void print_help() {
         << "-T <timeout> --dialtimeout <timeout>  dial timeout in seconds" << endl
         << "-u <name>    --user <name>            username (required)" << endl
         << "-c <passw>   --password <passw>       password for registration" << endl
-        << "-a <name>    --alias <name>           username alias" << endl 
         << "-l <addr>    --localaddress <addr>    local address to listen on" << endl 
         << "-o <file>    --opallog <file>         enable extra opal library logging to file" << endl
         << "-p <port>    --listenport <port>      the port to listen on" << endl 
@@ -52,7 +51,8 @@ static void print_help() {
         << "-d <prfx>    --audio-prefix <prfx>    recorded audio filename prefix" << endl 
         << "-f <file>    --file <file>            the name of played sound file" << endl 
         << "-g <addr>    --gatekeeper <addr>      gatekeeper to use" << endl 
-        << "-w <addr>    --gateway <addr>         gateway to use" << endl << endl;
+        << "-w <addr>    --gateway <addr>         gateway to use" << endl 
+        << "-a <name>    --alias <name>           username alias" << endl << endl;
 
     cerr << "The EBNF definition of the program syntax:" << endl
         << "<prog>  := cmd ';' <prog> | " << endl
@@ -173,13 +173,13 @@ void initSignalHandling() {
 }
 
 TestProcess::TestProcess() :
-    PProcess("Command line VoIP testphone", "sipcmd")
+    PProcess("LoxBerry Text2SIP", "text2sip")
 {
 }
 
 void TestProcess::Main()
 {
-    std::cout << "Starting LoxBerry Plugin Edition v0.3 by C.Woerstenfeld (C) 2016 git@loxberry.woerstenfeld.de " << std::endl;
+    std::cout << "Starting sipcmd LoxBerry Text2SIP Plugin Edition v0.5 adapted by C.Woerstenfeld (C) 2017 git@loxberry.woerstenfeld.de " << std::endl;
 //  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
@@ -321,7 +321,6 @@ bool Manager::Init(PArgList &args)
     args.Parse(
             "T-dialtimeout:"
             "u-user:"
-            "a-alias:"
             "c-password:"
             "l-localaddress:"
             "o-opallog:"
@@ -333,6 +332,7 @@ bool Manager::Init(PArgList &args)
             "g-gatekeeper:"
             "w-gateway:"
             "h-help:"
+            "a-alias:"
             );
 
 
@@ -740,4 +740,8 @@ void Manager::OnUserInputTone(OpalConnection &connection,char tone ,int duration
     std::cerr << __func__ << std::endl;
     std::cout << "receive DTMF: [" << tone << "] Duration: " << duration << std::endl;
     OpalManager::OnUserInputTone(connection , tone, duration);
+
+    std::cerr << "Aborting command sequence after receive DTMF digit " << endl;
+    TPState::Instance().SetState(TPState::TERMINATED);
+    ClearAllCalls();
 }
