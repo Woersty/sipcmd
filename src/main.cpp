@@ -24,6 +24,7 @@
 #include "main.h"
 #include "commands.h"
 #include "state.h"
+
 //#include "channels.h"
 int DIAL_TIMEOUT;
 
@@ -52,7 +53,8 @@ static void print_help() {
         << "-f <file>    --file <file>            the name of played sound file" << endl 
         << "-g <addr>    --gatekeeper <addr>      gatekeeper to use" << endl 
         << "-w <addr>    --gateway <addr>         gateway to use" << endl 
-        << "-a <name>    --alias <name>           username alias" << endl << endl;
+        << "-a <name>    --alias <name>           username alias" << endl 
+        << "-m <codec>   --mediaformat <codec>    select codec" << endl << endl;
 
     cerr << "The EBNF definition of the program syntax:" << endl
         << "<prog>  := cmd ';' <prog> | " << endl
@@ -179,7 +181,7 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting sipcmd LoxBerry Text2SIP Plugin Edition v0.5 adapted by C.Woerstenfeld (C) 2017 git@loxberry.woerstenfeld.de " << std::endl;
+    std::cout << "Starting sipcmd LoxBerry Text2SIP Plugin Edition v0.6 adapted by C.Woerstenfeld (sipcmd developed by Tuomo Makkonen)" << std::endl;
 //  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
@@ -242,8 +244,7 @@ bool LocalEndPoint::OnWriteMediaData(
   //        (BYTE*)data, length, written);
 }
 
-Manager::Manager() : localep(NULL), sipep(NULL), h323ep(NULL), 
-  listenmode(false), listenerup(false), pauseBeforeDialing(false)
+Manager::Manager() : localep(NULL), sipep(NULL), h323ep(NULL), listenmode(false), listenerup(false), pauseBeforeDialing(false), mediaFilter("*")
 {
   std::cerr << __func__  << std::endl;
 }
@@ -287,6 +288,12 @@ void Manager::Main(PArgList &args)
         cmdseq = args.GetOptionString('x');
     }
 
+    if (args.HasOption('m')) {
+         
+        mediaFilter = stringify(args.GetOptionString('m'));
+        std::cerr << "Codec-Filter: " << mediaFilter <<std::endl;
+    }
+ 
     // Parse command sequence
     if(!Command::Parse(cmdseq, sequence)) {
 
@@ -333,6 +340,7 @@ bool Manager::Init(PArgList &args)
             "w-gateway:"
             "h-help:"
             "a-alias:"
+            "m-mediaformat:"
             );
 
 
@@ -687,6 +695,16 @@ void Manager::OnClosedMediaStream (const OpalMediaStream &stream)
     std::cerr << __func__ << std::endl;
 }
 
+void Manager::AdjustMediaFormats(
+  bool local,                         ///<  Media formats a local ones to be presented to remote
+  const OpalConnection & connection,  ///<  Connection that is about to use formats
+  OpalMediaFormatList & mediaFormats  ///<  Media formats to use
+) const
+{
+     PStringArray mask("!"+mediaFilter);
+     mediaFormats.Remove(mask);
+}
+ 
 bool Manager::OnIncomingConnection(OpalConnection &connection, unsigned opts,
         OpalConnection::StringOptions *stropts)
 {
@@ -740,8 +758,4 @@ void Manager::OnUserInputTone(OpalConnection &connection,char tone ,int duration
     std::cerr << __func__ << std::endl;
     std::cout << "receive DTMF: [" << tone << "] Duration: " << duration << std::endl;
     OpalManager::OnUserInputTone(connection , tone, duration);
-
-    std::cerr << "Aborting command sequence after receive DTMF digit " << endl;
-    TPState::Instance().SetState(TPState::TERMINATED);
-    ClearAllCalls();
 }
