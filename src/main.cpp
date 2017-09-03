@@ -181,7 +181,7 @@ TestProcess::TestProcess() :
 
 void TestProcess::Main()
 {
-    std::cout << "Starting sipcmd LoxBerry Text2SIP Plugin Edition v0.6 adapted by C.Woerstenfeld (sipcmd developed by Tuomo Makkonen)" << std::endl;
+    std::cout << "Starting sipcmd LoxBerry Text2SIP Plugin Edition v0.7a adapted by C.Woerstenfeld (sipcmd developed by Tuomo Makkonen)" << std::endl;
 //  debug << "in debug mode" << std::endl;
     PArgList &args = GetArguments();
 
